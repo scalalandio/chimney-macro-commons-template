@@ -1,7 +1,10 @@
 package example
 
+import example.model1.Out
+import example.showmacros.*
+
 import java.util.concurrent.TimeUnit
-import org.openjdk.jmh.annotations._
+import org.openjdk.jmh.annotations.*
 
 @State(Scope.Thread)
 @Warmup(iterations = 3, time = 5, timeUnit = TimeUnit.SECONDS)
@@ -28,20 +31,10 @@ import org.openjdk.jmh.annotations._
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 class ShowOutputs {
 
-    val out = _root_.example.model1.Out.example
+  val out: Out = Out.example
 
-    @Benchmark
-    def showGenericProgrammingAuto: Any = ShowGenericProgrammingAuto.printObject(out)
+  def printObject(out: Out): String = out.showPretty()
 
-    @Benchmark
-    def showGenericProgrammingSemi: Any = ShowGenericProgrammingSemi.printObject(out)
-
-    @Benchmark
-    def showMagnoliaAuto: Any = ShowMagnoliaAuto.printObject(out)
-
-    @Benchmark
-    def showMagnoliaSemi: Any = ShowMagnoliaSemi.printObject(out)
-
-    @Benchmark
-    def showSanely: Any = ShowSanely.printObject(out)
+  @Benchmark
+  def showSanely: Any = printObject(out)
 }

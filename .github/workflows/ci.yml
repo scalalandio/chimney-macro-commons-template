@@ -1,0 +1,42 @@
+name: CI build
+
+on:
+  push:
+    branches: [ master ]
+    tags: [ '*' ]
+  pull_request:
+    branches: [ master ]
+    types: [ opened, reopened, labeled, synchronize ]
+
+jobs:
+  check-formatting:
+
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.action != 'labeled' # run for 'opened', 'reopened' and 'synchronize'
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: coursier/setup-action@v1.3.0
+        with:
+          apps: scalafmt
+      - name: Check formatting
+        run: scalafmt --check
+
+  build:
+
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.action != 'labeled' # run for 'opened', 'reopened' and 'synchronize'
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: coursier/cache-action@v6
+      - uses: coursier/setup-action@v1.3.0
+        with:
+          jvm: temurin:1.8.0-392
+          apps: sbt
+      - name: Run tests
+        run: sbt test

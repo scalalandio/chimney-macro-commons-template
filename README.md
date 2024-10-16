@@ -1,101 +1,12 @@
-# Derivation benchmarks
+# Chimney-Macro-Commons template
 
-Take a look at [_Slow Auto, Inconvenient Semi_ presentation](https://github.com/MateuszKubuszok/SlowAutoInconvenientSemi).
+Demo showing how to implement a type class that is cross-compilable between:
 
-## JSON round trip
+ - Scala 2.12/2.13/3
+ - Scala/Scala.js/Scala Native
+ - with sanely automatic derivation - see [_Slow Auto, Inconvenient Semi_ presentation](https://github.com/MateuszKubuszok/SlowAutoInconvenientSemi)
+ - meaningful error messages
+ - logging enabled with `-X-macro-settings:fastshowpretty.logging=true`
+ - using [chimney-macro-commons](https://chimney.readthedocs.io/en/stable/cookbook/#chimney-macro-commons)
 
-Projects:
-
- * `circeGenericAuto` - 1 JSON roundtrip with `import io.circe.generic.auto`
- * `circeGenericSemi` - 1 JSON roundtrip with `import io.circe.generic.semiauto`
- * `circeMagnoliaAuto` - 1 JSON roundtrip with automatic derivation implemented with Magnolia
- * `circeMagnoliaSemi` - 1 JSON roundtrip with semi-automatic derivation implemented with Magnolia
- * `jsoniterScalaSemi` - 1 JSON roundtrip with recursive semi-automatic derivation with Jsoniter Scala
- * `jsoniterScalaSanely` - 1 JSON roundtrip with sanely-automatic derivation using Jsoniter Scala under the hood (on Scala 3)
-
-> `circeMagnolia` was based on https://github.com/vpavkin/circe-magnolia/ since I couldn't find
-> any maintained up-to-date Magnolia-based derivation for Circe.
-
-Compilation time of the module (with only 1 needed implicit)
-```
-                     Scala 2   Scala 3  Units
-compilation of      cold hot  cold hot
-circeGenericAuto      14   4    46  16      s
-circeGenericSemi      12   3    10   1      s
-circeMagnoliaAuto     13   2    65  32      s
-circeMagnoliaSemi     12   7    12   2      s
-jsoniterScalaSanely    -   -     9   1      s
-jsoniterScalaSemi     10   4     8   1      s
-```
-
-Scala 2 runtime performance:
-```
-[info] Benchmark                          Mode  Cnt   Score   Error   Units
-[info] JsonRoundTrips.circeGenericAuto    thrpt  10   7.319 ± 0.011  ops/ms
-[info] JsonRoundTrips.circeGenericSemi    thrpt  10   6.775 ± 0.013  ops/ms
-[info] JsonRoundTrips.circeMagnoliaAuto   thrpt  10   7.689 ± 0.013  ops/ms
-[info] JsonRoundTrips.circeMagnoliaSemi   thrpt  10   7.838 ± 0.013  ops/ms
-[info] JsonRoundTrips.jsoniterScalaSemi   thrpt  10  20.081 ± 0.151  ops/ms
-```
-
-Scala 3 runtime performance:
-```
-[info] Benchmark                            Mode  Cnt   Score   Error   Units
-[info] JsonRoundTrips.circeGenericAuto     thrpt   10   0.490 ± 0.432  ops/ms
-[info] JsonRoundTrips.circeGenericSemi     thrpt   10   4.607 ± 0.014  ops/ms
-[info] JsonRoundTrips.circeMagnoliaAuto    thrpt   10   0.077 ± 0.039  ops/ms
-[info] JsonRoundTrips.circeMagnoliaSemi    thrpt   10   5.590 ± 0.013  ops/ms
-[info] JsonRoundTrips.jsoniterScalaSanely  thrpt   10  21.408 ± 0.070  ops/ms
-[info] JsonRoundTrips.jsoniterScalaSemi    thrpt   10  21.480 ± 0.070  ops/ms
-```
-
-## Show output generation
-
-Projects:
-
-* `showGenericProgrammingAuto` - `Show` output of a value generated with automatic derivation
-  (implemented with Shapeless on Scala 2, Mirrors on Scala 3)
-* `showGenericProgrammingSemi` - `Show` output of a value generated with semiautomatic derivation
-  (implemented with Shapeless on Scala 2, Mirrors on Scala 3)
-* `showMagnoliaAuto` - `Show` output of a value generated with automatic derivation (implemented with Magnolia)
-* `showMagnoliaSemi` - `Show` output of a value generated with semi-automatic derivation (implemented with Magnolia)
-* `showSanely` - `Show` output of a value generated with sanely-automatic derivation
-  (implemented with cross-compilable macros and Chimney-Macro-Commons)
-
-> `showMacros` (used by `showSanely`) were implemented in a naive way, just inlining everything:
->  - the first version generated code that didn't fit the method limit
->  - which is why the code on [`master`](https://github.com/MateuszKubuszok/derivation-benchmarks/tree/master)
->    uses `lazy val`s to split the code internally into smaller methods (but still in a naive way)
->  - meanwhile the code on [`cache`](https://github.com/MateuszKubuszok/derivation-benchmarks/tree/cache)
->    uses `def`s to reuse the derived code and save time both during compilation and in runtime
-
-Compilation time of the module (with only 1 needed implicit)
-```
-                            Scala 2   Scala 3  Units
-compilation of             cold hot  cold hot
-showGenericProgrammingAuto   15   5    53  29      s
-showGenericProgrammingSemi   10   2    10   2      s
-showMagnoliaAuto             10   1    43  15      s
-showMagnoliaSemi             10   2     9   1      s
-showSanely                    6   1     7   1      s
-```
-
-Scala 2 runtime performance:
-```
-[info] Benchmark                                Mode  Cnt  Score   Error   Units
-[info] ShowOutputs.showGenericProgrammingAuto  thrpt   10  2.787 ± 0.015  ops/ms
-[info] ShowOutputs.showGenericProgrammingSemi  thrpt   10  2.860 ± 0.027  ops/ms
-[info] ShowOutputs.showMagnoliaAuto            thrpt   10  3.713 ± 0.039  ops/ms
-[info] ShowOutputs.showMagnoliaSemi            thrpt   10  3.750 ± 0.013  ops/ms
-[info] ShowOutputs.showSanely                  thrpt   10  4.811 ± 0.026  ops/ms
-```
-
-Scala 3 runtime performance:
-```
-[info] Benchmark                                Mode  Cnt  Score   Error   Units
-[info] ShowOutputs.showGenericProgrammingAuto  thrpt   10  0.159 ± 0.023  ops/ms
-[info] ShowOutputs.showGenericProgrammingSemi  thrpt   10  3.475 ± 0.051  ops/ms
-[info] ShowOutputs.showMagnoliaAuto            thrpt   10  0.089 ± 0.023  ops/ms
-[info] ShowOutputs.showMagnoliaSemi            thrpt   10  4.096 ± 0.036  ops/ms
-[info] ShowOutputs.showSanely                  thrpt   10  4.800 ± 0.042  ops/ms
-```
+You can use it as a starting point ([GitHub template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template)) for your own macro-experiments.
